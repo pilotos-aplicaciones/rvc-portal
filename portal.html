@@ -68,7 +68,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .app-icon.c6 { background: #EEEDFE; }
 .app-info { flex: 1; min-width: 0; }
 .app-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.app-desc { font-size: 11px; color: var(--text2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .app-arrow { font-size: 14px; color: var(--accent); flex-shrink: 0; }
 .app-lock { font-size: 14px; color: var(--text3); flex-shrink: 0; }
 
@@ -255,7 +254,6 @@ function renderApps(){
         <div class="app-icon ${colorClass}">${icono}</div>
         <div class="app-info">
           <div class="app-name">${esc(a.nombre||a.id)}</div>
-          <div class="app-desc">${esc(a.descripcion||'')}</div>
         </div>
         <div class="app-arrow">→</div>
       </div>`;
@@ -264,7 +262,6 @@ function renderApps(){
         <div class="app-icon ${colorClass}">${icono}</div>
         <div class="app-info">
           <div class="app-name">${esc(a.nombre||a.id)}</div>
-          <div class="app-desc">${esc(a.descripcion||'')}</div>
         </div>
         <div class="app-lock">🔒</div>
       </div>`;
@@ -277,7 +274,6 @@ function renderApps(){
       <div class="app-icon c5">⚙</div>
       <div class="app-info">
         <div class="app-name">Administración</div>
-        <div class="app-desc">Gestionar usuarios y apps de la plataforma</div>
       </div>
       <div class="app-arrow">→</div>
     </div>`;
