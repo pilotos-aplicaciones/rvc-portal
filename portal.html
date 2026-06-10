@@ -53,30 +53,28 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .greeting-title { font-size: 24px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
 .greeting-sub { font-size: 14px; color: var(--text2); }
 
-.apps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
-.app-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; cursor: pointer; transition: all .15s ease; position: relative; text-decoration: none; color: inherit; display: block; }
-.app-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.06); }
-.app-card.disabled { opacity: .55; cursor: not-allowed; }
-.app-card.disabled:hover { border-color: var(--border); transform: none; box-shadow: none; }
+.apps-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.app-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; cursor: pointer; transition: all .15s ease; display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+.app-card:hover { border-color: var(--accent); box-shadow: 0 3px 12px rgba(0,0,0,.07); }
+.app-card.disabled { opacity: .5; cursor: not-allowed; }
+.app-card.disabled:hover { border-color: var(--border); box-shadow: none; }
 .app-card.admin { border-color: var(--accent); background: linear-gradient(135deg, #fff 0%, #FFF8F8 100%); }
-.app-icon { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 14px; }
+.app-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
 .app-icon.c1 { background: var(--red-l); }
 .app-icon.c2 { background: var(--blue-l); }
 .app-icon.c3 { background: var(--amber-l); }
 .app-icon.c4 { background: var(--green-l); }
 .app-icon.c5 { background: #F1EFE8; }
 .app-icon.c6 { background: #EEEDFE; }
-.app-name { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-.app-desc { font-size: 13px; color: var(--text2); line-height: 1.4; margin-bottom: 16px; min-height: 36px; }
-.app-footer { display: flex; align-items: center; justify-content: space-between; }
-.app-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
-.badge-on { background: var(--green-l); color: var(--green); }
-.badge-off { background: #F1EFE8; color: var(--text3); }
-.badge-pause { background: var(--amber-l); color: var(--amber); }
-.badge-admin { background: rgba(204,41,41,.15); color: var(--accent); }
-.badge-locked { background: #F1EFE8; color: var(--text3); }
-.app-action { font-size: 13px; color: var(--accent); font-weight: 600; }
-.app-card.disabled .app-action { display: none; }
+.app-info { flex: 1; min-width: 0; }
+.app-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app-desc { font-size: 11px; color: var(--text2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app-arrow { font-size: 14px; color: var(--accent); flex-shrink: 0; }
+.app-lock { font-size: 14px; color: var(--text3); flex-shrink: 0; }
+
+@media (max-width: 600px) {
+  .apps-grid { grid-template-columns: 1fr; }
+}
 
 .empty-state { text-align: center; padding: 60px 20px; color: var(--text3); }
 .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
@@ -242,58 +240,53 @@ function renderApps(){
     return;
   }
 
+  // Solo mostrar apps activas en la plataforma
+  const appsActivas = apps.filter(a => a.activa !== false);
+
   let html = '<div class="apps-grid">';
 
-  apps.forEach((a, idx) => {
+  appsActivas.forEach((a, idx) => {
     const tieneAcceso = userApps.includes(a.id);
-    const activa = a.activa !== false;
     const icono = a.icono || ICONOS[idx % ICONOS.length];
     const colorClass = COLORES[idx % COLORES.length];
-    const clickable = tieneAcceso && activa;
 
-    let badge, action;
-    if(!tieneAcceso){
-      badge = `<span class="app-badge badge-locked">🔒 Sin acceso</span>`;
-      action = '';
-    } else if(!activa){
-      badge = `<span class="app-badge badge-pause">⏸ Pausada</span>`;
-      action = '';
+    if(tieneAcceso){
+      html += `<div class="app-card" onclick="window.open('${esc(a.url||'')}','_blank')">
+        <div class="app-icon ${colorClass}">${icono}</div>
+        <div class="app-info">
+          <div class="app-name">${esc(a.nombre||a.id)}</div>
+          <div class="app-desc">${esc(a.descripcion||'')}</div>
+        </div>
+        <div class="app-arrow">→</div>
+      </div>`;
     } else {
-      badge = `<span class="app-badge badge-on">● Activa</span>`;
-      action = `<span class="app-action">Abrir →</span>`;
+      html += `<div class="app-card disabled">
+        <div class="app-icon ${colorClass}">${icono}</div>
+        <div class="app-info">
+          <div class="app-name">${esc(a.nombre||a.id)}</div>
+          <div class="app-desc">${esc(a.descripcion||'')}</div>
+        </div>
+        <div class="app-lock">🔒</div>
+      </div>`;
     }
-
-    const cardClass = clickable ? 'app-card' : 'app-card disabled';
-    const onClick = clickable ? `onclick="window.open('${esc(a.url||'')}','_blank')"` : '';
-
-    html += `<div class="${cardClass}" ${onClick}>
-      <div class="app-icon ${colorClass}">${icono}</div>
-      <div class="app-name">${esc(a.nombre||a.id)}</div>
-      <div class="app-desc">${esc(a.descripcion||'')}</div>
-      <div class="app-footer">
-        ${badge}
-        ${action}
-      </div>
-    </div>`;
   });
 
   // Si es admin, agregar tarjeta de administración
   if(esAdmin){
     html += `<div class="app-card admin" onclick="window.open('${ADMIN_URL}','_blank')">
       <div class="app-icon c5">⚙</div>
-      <div class="app-name">Administración</div>
-      <div class="app-desc">Gestionar usuarios y apps de la plataforma</div>
-      <div class="app-footer">
-        <span class="app-badge badge-admin">⚙ Admin</span>
-        <span class="app-action">Abrir →</span>
+      <div class="app-info">
+        <div class="app-name">Administración</div>
+        <div class="app-desc">Gestionar usuarios y apps de la plataforma</div>
       </div>
+      <div class="app-arrow">→</div>
     </div>`;
   }
 
   html += '</div>';
 
   // Si el usuario no tiene ninguna app activa con acceso
-  const conAccesoActivo = apps.some(a => userApps.includes(a.id) && a.activa !== false);
+  const conAccesoActivo = appsActivas.some(a => userApps.includes(a.id));
   if(!conAccesoActivo && !esAdmin){
     html += `<div class="empty-state" style="margin-top:30px">
       <p style="color:var(--text2);font-size:13px">Aún no tienes apps asignadas. Contacta al administrador para solicitar acceso.</p>
